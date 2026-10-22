@@ -36,9 +36,16 @@ const publicApiPrefixes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Production HTTPS uses the `__Secure-` cookie prefix; without this,
+  // getToken misses the session and logins appear to fail after redirect.
+  const isHttps =
+    request.nextUrl.protocol === "https:" ||
+    request.headers.get("x-forwarded-proto") === "https";
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
+    secureCookie: isHttps,
   });
 
   const isPublicApi = publicApiPrefixes.some(
