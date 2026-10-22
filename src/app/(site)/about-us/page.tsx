@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import { AboutPremium } from "@/components/marketing/about-premium";
 import { getPublishedPageBySlug } from "@/lib/cms/data";
 
+export const dynamic = "force-dynamic";
+
 const FALLBACK = {
   title: "About Us",
   excerpt:

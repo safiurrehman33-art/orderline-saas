@@ -52,7 +52,8 @@
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "^65.1.0"
   },
   "allowScripts": {
     "@prisma/engines@7.10.0": true,

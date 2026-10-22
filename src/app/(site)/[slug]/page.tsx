@@ -4,6 +4,8 @@ import { connection } from "next/server";
 import { CmsArticle } from "@/components/marketing/cms-article";
 import { getPublishedPageBySlug } from "@/lib/cms/data";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 const RESERVED = new Set([

@@ -4,6 +4,8 @@ import { ProHome } from "@/components/marketing/pro-home";
 import { getHomePage } from "@/lib/cms/data";
 import { DEFAULT_HOME_BLOCKS } from "@/lib/cms/types";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const { page, blocks } = await getHomePage();
   return {

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { getPublishedNavItems } from "@/lib/cms/data";
 
+export const dynamic = "force-dynamic";
+
 const sora = Sora({
   subsets: ["latin"],
   variable: "--font-sora",
