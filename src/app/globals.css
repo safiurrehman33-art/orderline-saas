@@ -1,26 +1,257 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f2f5f3;
+  --foreground: #122018;
+  --muted: #5f6f66;
+  --surface: #ffffff;
+  --accent: #0f6b4c;
+  --accent-hover: #0c5740;
+  --accent-soft: #d9f0e6;
+  --line: #d5e0d9;
+  --danger: #c23b3b;
+  --danger-hover: #a52f2f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1100px 520px at 0% -10%, #d9f0e6 0%, transparent 55%),
+    radial-gradient(900px 480px at 100% 0%, #e4ebf5 0%, transparent 50%),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+* {
+  border-color: var(--line);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease-out both;
+}
+
+/* Marketing / CMS site */
+@keyframes mkt-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mkt-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.mkt-fade-up {
+  animation: mkt-fade-up 0.7s ease-out both;
+}
+.mkt-delay-1 {
+  animation-delay: 0.12s;
+}
+.mkt-delay-2 {
+  animation-delay: 0.24s;
+}
+.mkt-delay-3 {
+  animation-delay: 0.36s;
+}
+.mkt-kenburns {
+  animation: mkt-kenburns 18s ease-out forwards;
+}
+.mkt-reveal {
+  animation: mkt-fade-up 0.8s ease-out both;
+}
+
+@keyframes mkt-photo-drift {
+  0% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, -1.5%, 0);
+  }
+}
+
+.mkt-photo-drift {
+  animation: mkt-photo-drift 14s ease-out forwards;
+}
+
+@keyframes mkt-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.mkt-float {
+  animation: mkt-float 6s ease-in-out infinite;
+}
+
+.prose-cms h2 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #10241a;
+}
+.prose-cms h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #10241a;
+}
+.prose-cms p {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+}
+.prose-cms ul,
+.prose-cms ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+}
+.prose-cms li {
+  margin: 0.35rem 0;
+}
+.prose-cms a {
+  color: #0d9f6e;
+  text-decoration: underline;
+}
+.prose-cms img {
+  max-width: 100%;
+  border-radius: 1rem;
+}
+
+@keyframes tablePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.08);
+  }
+}
+
+/* Thin professional scrollbars — dark surfaces (POS / kitchen) */
+.scroll-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #e11d48 rgba(255, 255, 255, 0.06);
+}
+
+.scroll-dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-dark::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  margin: 4px;
+}
+
+.scroll-dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #fda4af 0%, #be123c 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-dark::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Subtle horizontal chip scroller */
+.scroll-chips {
+  scrollbar-width: thin;
+  scrollbar-color: #e11d48 transparent;
+}
+
+.scroll-chips::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scroll-chips::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.scroll-chips::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #fb7185, #e11d48);
+  border-radius: 999px;
+}
+
+.scroll-chips:hover::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #fda4af, #be123c);
+}
+
+/* App shell — light surfaces */
+.scroll-light {
+  scrollbar-width: thin;
+  scrollbar-color: #0f6b4c rgba(15, 107, 76, 0.08);
+}
+
+.scroll-light::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-light::-webkit-scrollbar-track {
+  background: rgba(15, 107, 76, 0.08);
+  border-radius: 999px;
+  margin: 4px;
+}
+
+.scroll-light::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1a8f66 0%, #0f6b4c 100%);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-light::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #0f6b4c 0%, #0c5740 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }

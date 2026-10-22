@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OrderLine SaaS
 
-## Getting Started
+Multi-tenant order management built with **Next.js 16**, **PostgreSQL**, **Prisma 7**, and **Auth.js**.
 
-First, run the development server:
+## Features
+
+- **Auth** — register (creates org + OWNER), login/logout, JWT sessions, password reset, change password
+- **Tenant context** — org-scoped data, org switcher, RBAC (`OWNER` / `ADMIN` / `MEMBER`)
+- **Audit log** — tenant activity feed on dashboard + `/activity` (search/filter)
+- **Customers** — CRUD, search/sort/pagination, archive, tags, addresses, CSV export
+- **Products** — CRUD, SKU uniqueness, pricing/cost, stock tracking, categories, archive, CSV export
+- **Orders** — line items, auto order numbers, status workflow + history, duplicate, stock decrement, CSV export
+- **Settings** — org profile, invite/add members, role updates, password change
+- **Dashboard** — KPIs, pipeline, recent orders, low-stock alerts, activity feed
+
+## Quick start (local PostgreSQL)
+
+Requires a local PostgreSQL install (this project targets the Windows PostgreSQL service, not Docker).
 
 ```bash
+npm install
+cp .env.example .env   # keep DATABASE_URL + set AUTH_SECRET
+
+# One-time: create orderline role + database (prompts for postgres superuser password)
+npm run db:setup
+
+# Push Prisma schema
+npm run db:push
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- App: http://localhost:3000  
+- Seed demo login: `npm run db:seed`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Demo login**
+- Email: `demo@orderline.app`
+- Password: `Demo1234!`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Default app connection string:
 
-## Learn More
+```env
+DATABASE_URL="postgresql://orderline:orderline@localhost:5432/orderline?schema=public"
+```
 
-To learn more about Next.js, take a look at the following resources:
+If you prefer the `postgres` superuser instead, update `DATABASE_URL` accordingly and create an `orderline` database first.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Dev server |
+| `npm run db:setup` | Create local `orderline` role + database |
+| `npm run db:push` | Push schema to PostgreSQL |
+| `npm run db:migrate` | Migrations |
+| `npm run db:studio` | Prisma Studio |
 
-## Deploy on Vercel
+## Stack notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Prisma Client: `src/lib/db.ts` (`@prisma/adapter-pg`)
+- Auth: `src/auth.ts` + middleware protection
+- Tenant/RBAC: `src/lib/tenant.ts`, `src/lib/permissions.ts`
+- Domain actions: `src/lib/actions/*`
