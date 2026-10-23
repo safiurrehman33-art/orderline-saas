@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CmsArticle } from "@/components/marketing/cms-article";
 import { getPublishedPageBySlug } from "@/lib/cms/data";
+import { cmsPageMetadata } from "@/lib/cms/seo-metadata";
+import { absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -31,27 +33,16 @@ const RESERVED = new Set([
   "whatsapp",
   "onboarding",
   "about-us",
+  "sitemap.xml",
+  "robots.txt",
 ]);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   if (RESERVED.has(slug) || slug === "home") return {};
   const page = await getPublishedPageBySlug(slug);
-  if (!page) return { title: "Not found" };
-  return {
-    title: page.metaTitle || page.title,
-    description: page.metaDescription || page.excerpt || undefined,
-    keywords: page.metaKeywords?.split(",").map((k) => k.trim()),
-    robots: page.noIndex ? { index: false, follow: false } : undefined,
-    openGraph: {
-      title: page.metaTitle || page.title,
-      description: page.metaDescription || page.excerpt || undefined,
-      images: page.ogImage ? [page.ogImage] : undefined,
-    },
-    alternates: {
-      canonical: page.canonicalPath || `/${page.slug}`,
-    },
-  };
+  if (!page) return { title: "Not found", robots: { index: false, follow: false } };
+  return cmsPageMetadata(page);
 }
 
 export default async function CmsSlugPage({ params }: Props) {
@@ -62,9 +53,30 @@ export default async function CmsSlugPage({ params }: Props) {
   const page = await getPublishedPageBySlug(slug);
   if (!page || page.template === "HOME") notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: page.metaTitle || page.title,
+    description: page.metaDescription || page.excerpt || undefined,
+    url: absoluteUrl(page.canonicalPath || `/${page.slug}`),
+    isPartOf: {
+      "@type": "WebSite",
+      name: "OrderLine",
+      url: absoluteUrl("/"),
+    },
+  };
+
   return (
     <div className="min-h-[70vh] bg-[#f5f9f6]">
-      <CmsArticle title={page.title} html={page.contentHtml || "<p></p>"} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <CmsArticle
+        title={page.title}
+        excerpt={page.excerpt}
+        html={page.contentHtml || "<p></p>"}
+      />
     </div>
   );
 }

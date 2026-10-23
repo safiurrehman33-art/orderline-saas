@@ -17,6 +17,8 @@ function asJson(value: unknown): Prisma.InputJsonValue {
 
 function revalidateMarketing(slug?: string) {
   revalidatePath("/");
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/robots.txt");
   revalidatePath("/super-admin");
   revalidatePath("/super-admin/pages");
   revalidatePath("/super-admin/navbar");
@@ -40,12 +42,12 @@ export async function upsertCmsPageAction(
   const status = String(formData.get("status") ?? "DRAFT") === "PUBLISHED"
     ? "PUBLISHED"
     : "DRAFT";
-  const metaTitle = String(formData.get("metaTitle") ?? "").trim() || null;
+  let metaTitle = String(formData.get("metaTitle") ?? "").trim() || null;
   const metaDescription =
     String(formData.get("metaDescription") ?? "").trim() || null;
   const metaKeywords = String(formData.get("metaKeywords") ?? "").trim() || null;
   const ogImage = String(formData.get("ogImage") ?? "").trim() || null;
-  const canonicalPath =
+  let canonicalPath =
     String(formData.get("canonicalPath") ?? "").trim() || null;
   const noIndex = formData.get("noIndex") === "on";
   const homeBlocksRaw = String(formData.get("homeBlocksJson") ?? "").trim();
@@ -62,6 +64,12 @@ export async function upsertCmsPageAction(
     slug = slugifyCms(slug || title);
   }
   if (!slug) return { error: "Slug is required." };
+
+  // SEO defaults when Super Admin leaves fields blank
+  if (!metaTitle) metaTitle = title;
+  if (!canonicalPath) {
+    canonicalPath = slug === "home" ? "/" : `/${slug}`;
+  }
 
   const taken = await db.cmsPage.findFirst({
     where: {

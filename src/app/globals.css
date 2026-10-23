@@ -123,6 +123,12 @@ body {
   animation: mkt-float 6s ease-in-out infinite;
 }
 
+.prose-cms h1 {
+  margin: 1.75rem 0 0.85rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #10241a;
+}
 .prose-cms h2 {
   margin: 1.5rem 0 0.75rem;
   font-size: 1.35rem;
@@ -153,7 +159,42 @@ body {
 }
 .prose-cms img {
   max-width: 100%;
+  height: auto;
   border-radius: 1rem;
+  margin: 1rem 0;
+}
+.prose-cms blockquote {
+  margin: 1rem 0;
+  border-left: 3px solid #0d9f6e;
+  padding-left: 1rem;
+  color: #3d5649;
+  font-style: italic;
+}
+.prose-cms table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.prose-cms th,
+.prose-cms td {
+  border: 1px solid #d7e5dc;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-cms code {
+  border-radius: 0.35rem;
+  background: #eef5f1;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.85em;
+}
+.prose-cms pre {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: #10241a;
+  color: #d7e5dc;
+  padding: 1rem;
+  margin: 1rem 0;
 }
 
 @keyframes tablePulse {

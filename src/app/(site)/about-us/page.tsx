@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { AboutPremium } from "@/components/marketing/about-premium";
 import { getPublishedPageBySlug } from "@/lib/cms/data";
+import { cmsPageMetadata } from "@/lib/cms/seo-metadata";
+import { absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -20,37 +22,17 @@ const FALLBACK = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPublishedPageBySlug("about-us");
-  const title = page?.metaTitle || FALLBACK.metaTitle;
-  const description = page?.metaDescription || FALLBACK.metaDescription;
-  const keywords = (page?.metaKeywords || FALLBACK.metaKeywords)
-    .split(",")
-    .map((k) => k.trim())
-    .filter(Boolean);
-  const ogImage = page?.ogImage || FALLBACK.ogImage;
-
-  return {
-    title,
-    description,
-    keywords,
-    robots: page?.noIndex ? { index: false, follow: false } : { index: true, follow: true },
-    openGraph: {
-      type: "website",
-      title,
-      description,
-      url: page?.canonicalPath || "/about-us",
-      images: [{ url: ogImage, alt: "About OrderLine restaurant platform" }],
-      siteName: "OrderLine",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-    alternates: {
-      canonical: page?.canonicalPath || "/about-us",
-    },
-  };
+  return cmsPageMetadata({
+    title: page?.title || FALLBACK.title,
+    slug: "about-us",
+    excerpt: page?.excerpt || FALLBACK.excerpt,
+    metaTitle: page?.metaTitle || FALLBACK.metaTitle,
+    metaDescription: page?.metaDescription || FALLBACK.metaDescription,
+    metaKeywords: page?.metaKeywords || FALLBACK.metaKeywords,
+    ogImage: page?.ogImage || FALLBACK.ogImage,
+    canonicalPath: page?.canonicalPath || "/about-us",
+    noIndex: page?.noIndex,
+  });
 }
 
 export default async function AboutUsPage() {
@@ -62,18 +44,18 @@ export default async function AboutUsPage() {
     "@type": "AboutPage",
     name: page?.metaTitle || FALLBACK.metaTitle,
     description: page?.metaDescription || FALLBACK.metaDescription,
-    url: "/about-us",
+    url: absoluteUrl("/about-us"),
     isPartOf: {
       "@type": "WebSite",
       name: "OrderLine",
-      url: "/",
+      url: absoluteUrl("/"),
     },
     about: {
       "@type": "Organization",
       name: "OrderLine",
       description:
         "Multi-tenant restaurant operations platform with POS, kitchen display, tables, customers, reports, smart pricing, and WhatsApp AI.",
-      url: "/",
+      url: absoluteUrl("/"),
     },
   };
 
