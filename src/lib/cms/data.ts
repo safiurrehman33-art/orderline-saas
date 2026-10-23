@@ -31,7 +31,8 @@ function normalizeHomeBlocks(raw: HomeBlocks | null | undefined): HomeBlocks {
     modulesHeading: base.modulesHeading ?? DEFAULT_HOME_BLOCKS.modulesHeading,
     modulesSubheading:
       base.modulesSubheading ?? DEFAULT_HOME_BLOCKS.modulesSubheading,
-    modules: base.modules?.length ? base.modules : DEFAULT_OWNER_MODULES,
+    // Keep module copy editable later, but always use the latest product images.
+    modules: DEFAULT_OWNER_MODULES,
   };
 }
 

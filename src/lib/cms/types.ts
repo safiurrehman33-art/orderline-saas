@@ -52,7 +52,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Peak-hour trend graphs",
       "Branch-ready KPI cards",
     ],
-    imageUrl: "/menu/menu-bucket.jpg",
+    imageUrl: "/modules/dashboard.jpg",
   },
   {
     title: "POS & order desk",
@@ -64,7 +64,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Smart tax on every ticket",
       "Print-ready receipts",
     ],
-    imageUrl: "/menu/menu-burger.jpg",
+    imageUrl: "/modules/pos.jpg",
   },
   {
     title: "Kitchen display",
@@ -76,7 +76,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Clear ready alerts",
       "Less verbal chasing",
     ],
-    imageUrl: "/menu/menu-chicken.jpg",
+    imageUrl: "/modules/kitchen.jpg",
   },
   {
     title: "Menu, deals & catalog",
@@ -88,7 +88,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Category ordering",
       "Workspace isolation",
     ],
-    imageUrl: "/menu/menu-deal.jpg",
+    imageUrl: "/modules/menu.jpg",
   },
   {
     title: "Tables & floor plan",
@@ -100,7 +100,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Seat-aware orders",
       "Service clarity",
     ],
-    imageUrl: "/menu/menu-wings.jpg",
+    imageUrl: "/modules/tables.jpg",
   },
   {
     title: "Customers & delivery",
@@ -112,7 +112,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Order history links",
       "Delivery-ready tickets",
     ],
-    imageUrl: "/menu/menu-wrap.jpg",
+    imageUrl: "/modules/customers.jpg",
   },
   {
     title: "WhatsApp AI ordering",
@@ -124,7 +124,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Order tracking replies",
       "Human handoff",
     ],
-    imageUrl: "/menu/menu-drink.jpg",
+    imageUrl: "/modules/whatsapp.jpg",
   },
   {
     title: "Reports & smart pricing",
@@ -136,7 +136,7 @@ export const DEFAULT_OWNER_MODULES: OwnerModule[] = [
       "Tax & service charge",
       "Owner-ready insights",
     ],
-    imageUrl: "/menu/menu-dessert.jpg",
+    imageUrl: "/modules/reports.jpg",
   },
 ];
 
