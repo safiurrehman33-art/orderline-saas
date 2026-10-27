@@ -69,7 +69,9 @@ export function WhatsAppAiPanel({
             {configured ? provider : "Not configured"}
           </p>
           <p className="mt-1 text-xs text-muted">
-            {configured ? `Model: ${model}` : "Add OPENAI_API_KEY in .env"}
+            {configured
+              ? `Model: ${model}`
+              : "Add GEMINI_API_KEY in .env"}
           </p>
         </div>
         <div className="rounded-xl border border-line bg-background/70 p-3">
@@ -99,17 +101,27 @@ export function WhatsAppAiPanel({
 
       {!configured ? (
         <div className="mt-4 rounded-xl border border-dashed border-danger/30 bg-danger/5 px-4 py-3 text-sm text-muted">
-          <p className="font-medium text-foreground">Setup OpenAI for smart replies</p>
+          <p className="font-medium text-foreground">
+            Setup Gemini (free tier) for smart replies
+          </p>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm leading-6">
             <li>
-              Add to <code className="text-xs">.env</code>:{" "}
-              <code className="text-xs">OPENAI_API_KEY=sk-...</code>
+              Get a key from{" "}
+              <a
+                className="text-accent underline"
+                href="https://aistudio.google.com/apikey"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google AI Studio
+              </a>
             </li>
             <li>
-              Optional:{" "}
-              <code className="text-xs">OPENAI_MODEL=gpt-4o-mini</code>
+              Add{" "}
+              <code className="text-xs">GEMINI_API_KEY=...</code> (and optional{" "}
+              <code className="text-xs">GEMINI_MODEL=gemini-2.5-flash</code>)
             </li>
-            <li>Restart <code className="text-xs">npm run dev</code></li>
+            <li>Redeploy / restart the app</li>
             <li>Connect WhatsApp number → Activate bot</li>
           </ol>
           {!canManage ? (

@@ -195,6 +195,162 @@ async function runOpenAiAgent(input: {
   };
 }
 
+function geminiFunctionDeclarations() {
+  return AGENT_TOOL_DEFINITIONS.map((tool) => ({
+    name: tool.function.name,
+    description: tool.function.description,
+    parameters: tool.function.parameters,
+  }));
+}
+
+async function runGeminiAgent(input: {
+  organizationId: string;
+  conversationId: string;
+  customerWaId: string;
+  userMessage: string;
+  orgName: string;
+  caps: ChatbotCaps;
+  menuDigest: string;
+  history: { role: "user" | "assistant"; content: string }[];
+}): Promise<AgentRunResult | null> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+  const toolTrace: AgentRunResult["toolTrace"] = [];
+  let handoff = false;
+
+  type GeminiPart = {
+    text?: string;
+    functionCall?: {
+      name: string;
+      args?: Record<string, unknown>;
+      id?: string;
+    };
+    functionResponse?: {
+      name: string;
+      response: Record<string, unknown>;
+      id?: string;
+    };
+  };
+
+  type GeminiContent = {
+    role: "user" | "model";
+    parts: GeminiPart[];
+  };
+
+  const contents: GeminiContent[] = [
+    ...input.history.slice(-12).map((m) => ({
+      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+      parts: [{ text: m.content }],
+    })),
+    { role: "user", parts: [{ text: input.userMessage }] },
+  ];
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  for (let round = 0; round < 6; round += 1) {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [
+            {
+              text: buildSystemPrompt(
+                input.orgName,
+                input.caps,
+                input.menuDigest,
+              ),
+            },
+          ],
+        },
+        contents,
+        tools: [{ functionDeclarations: geminiFunctionDeclarations() }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: input.caps.maxReplyTokens || 800,
+        },
+      }),
+    });
+
+    const json = (await res.json()) as {
+      error?: { message?: string };
+      candidates?: Array<{
+        content?: { parts?: GeminiPart[] };
+      }>;
+    };
+
+    if (!res.ok) {
+      throw new Error(json.error?.message || `Gemini error ${res.status}`);
+    }
+
+    const parts = json.candidates?.[0]?.content?.parts ?? [];
+    if (!parts.length) {
+      throw new Error("Gemini returned an empty response.");
+    }
+
+    const functionCalls = parts.filter((p) => p.functionCall?.name);
+    if (!functionCalls.length) {
+      const text = parts
+        .map((p) => p.text)
+        .filter(Boolean)
+        .join("\n")
+        .trim();
+      return {
+        reply: text || input.caps.fallbackMessage,
+        toolTrace,
+        handoff,
+        provider: "gemini",
+      };
+    }
+
+    contents.push({ role: "model", parts });
+
+    const responseParts: GeminiPart[] = [];
+    for (const part of functionCalls) {
+      const call = part.functionCall!;
+      const args = (call.args ?? {}) as Record<string, unknown>;
+      const result = await executeAgentTool({
+        organizationId: input.organizationId,
+        conversationId: input.conversationId,
+        customerWaId: input.customerWaId,
+        name: call.name,
+        args,
+        capabilities: input.caps,
+      });
+      toolTrace.push({ name: call.name, args, result });
+      if (
+        call.name === "request_human_handoff" &&
+        result &&
+        typeof result === "object" &&
+        "handoff" in result &&
+        (result as { handoff?: boolean }).handoff
+      ) {
+        handoff = true;
+      }
+      responseParts.push({
+        functionResponse: {
+          name: call.name,
+          ...(call.id ? { id: call.id } : {}),
+          response:
+            result && typeof result === "object"
+              ? (result as Record<string, unknown>)
+              : { result },
+        },
+      });
+    }
+    contents.push({ role: "user", parts: responseParts });
+  }
+
+  return {
+    reply: input.caps.fallbackMessage,
+    toolTrace,
+    handoff,
+    provider: "gemini",
+  };
+}
+
 async function runLocalAgent(input: {
   organizationId: string;
   conversationId: string;
@@ -584,28 +740,46 @@ export async function runWhatsAppAgent(input: {
     .join("\n");
 
   const forceLocal = process.env.WHATSAPP_AI_PROVIDER === "local";
+  const prefer = process.env.WHATSAPP_AI_PROVIDER?.trim().toLowerCase() || "";
   if (!forceLocal) {
+    const agentInput = {
+      ...input,
+      orgName: org.name,
+      caps: chatbotCaps,
+      menuDigest,
+      history,
+    };
+
     try {
-      const openAi = await runOpenAiAgent({
-        ...input,
-        orgName: org.name,
-        caps: chatbotCaps,
-        menuDigest,
-        history,
-      });
+      const preferOpenAi = prefer === "openai";
+      const preferGemini = prefer === "gemini" || prefer === "";
+
+      if (preferGemini || !process.env.OPENAI_API_KEY?.trim()) {
+        const gemini = await runGeminiAgent(agentInput);
+        if (gemini) return gemini;
+      }
+
+      if (preferOpenAi || !process.env.GEMINI_API_KEY?.trim()) {
+        const openAi = await runOpenAiAgent(agentInput);
+        if (openAi) return openAi;
+      }
+
+      // Try the other provider if the preferred one had no key
+      const gemini = await runGeminiAgent(agentInput);
+      if (gemini) return gemini;
+      const openAi = await runOpenAiAgent(agentInput);
       if (openAi) return openAi;
 
-      // No API key configured
       return {
         reply:
           "Thanks for your message. Our AI assistant is not configured yet. Please contact the restaurant directly, or try again later.",
         toolTrace: [],
         handoff: false,
-        provider: "openai",
+        provider: "gemini",
       };
     } catch (error) {
       console.error(
-        "[whatsapp.agent] OpenAI failed:",
+        "[whatsapp.agent] LLM failed:",
         error instanceof Error ? error.message : error,
       );
       return {
@@ -614,7 +788,7 @@ export async function runWhatsAppAgent(input: {
           "Sorry — I’m having trouble right now. Please try again in a moment.",
         toolTrace: [],
         handoff: false,
-        provider: "openai",
+        provider: process.env.GEMINI_API_KEY?.trim() ? "gemini" : "openai",
       };
     }
   }

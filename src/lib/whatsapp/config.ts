@@ -62,15 +62,33 @@ export function getWhatsAppWebhookPath() {
   return "/api/whatsapp/webhook";
 }
 
-/** Real LLM used by the WhatsApp chatbot (OpenAI tool-calling agent). */
+/** Real LLM used by the WhatsApp chatbot (Gemini or OpenAI tool-calling agent). */
 export function getWhatsAppAiConfig() {
-  const apiKey = process.env.OPENAI_API_KEY?.trim() || "";
-  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const geminiKey = process.env.GEMINI_API_KEY?.trim() || "";
+  const openAiKey = process.env.OPENAI_API_KEY?.trim() || "";
   const forceLocal = process.env.WHATSAPP_AI_PROVIDER === "local";
+  const prefer =
+    process.env.WHATSAPP_AI_PROVIDER?.trim().toLowerCase() || "";
+
+  const useGemini =
+    !forceLocal &&
+    Boolean(geminiKey) &&
+    (prefer === "gemini" || prefer === "" || !openAiKey);
+  const useOpenAi = !forceLocal && Boolean(openAiKey) && !useGemini;
+
+  const model = useGemini
+    ? process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash"
+    : process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 
   return {
-    configured: Boolean(apiKey) && !forceLocal,
-    provider: forceLocal ? "local" : apiKey ? "OpenAI" : "none",
+    configured: (useGemini || useOpenAi) && !forceLocal,
+    provider: forceLocal
+      ? "local"
+      : useGemini
+        ? "Gemini"
+        : useOpenAi
+          ? "OpenAI"
+          : "none",
     model,
     forceLocal,
   };

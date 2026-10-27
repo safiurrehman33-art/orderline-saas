@@ -19,7 +19,7 @@ export type AgentRunResult = {
     result: unknown;
   }>;
   handoff: boolean;
-  provider: "openai" | "local";
+  provider: "openai" | "gemini" | "local";
 };
 
 export type ConversationCartItem = {
